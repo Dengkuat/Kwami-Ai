@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import SideMenu from '../components/SideMenu'
-import { ROUTE_PATHS } from '../routes/routePaths'
+import { buildChatLink, buildPresetChatLink } from '../data/chatPresets'
 import { landingContent, type Language } from './landingContent'
 import './LandingPage.css'
 
@@ -41,6 +41,7 @@ function LandingPage() {
   const [language, setLanguage] = useState<Language>('kinyarwanda')
   const [menuOpen, setMenuOpen] = useState(false)
   const t = landingContent[language]
+  const langCode = language === 'kinyarwanda' ? 'rw' : 'en'
 
   useEffect(() => {
     document.documentElement.lang = language === 'kinyarwanda' ? 'rw' : 'en'
@@ -116,7 +117,7 @@ function LandingPage() {
         <button
           type="button"
           className="landing-cta"
-          onClick={() => navigate(ROUTE_PATHS.chat)}
+          onClick={() => navigate(buildChatLink({ language: langCode }))}
         >
           {t.cta}
           <span aria-hidden="true">→</span>
@@ -130,7 +131,7 @@ function LandingPage() {
                 key={id}
                 type="button"
                 className="landing-feature-card"
-                onClick={() => navigate(ROUTE_PATHS.chat)}
+                onClick={() => navigate(buildPresetChatLink(id, langCode, title))}
               >
                 <span
                   className="landing-feature-card__icon"
