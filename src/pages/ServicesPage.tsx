@@ -1,15 +1,18 @@
 import { useCallback, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import AppShell from '../components/layout/AppShell'
 import CategoryScroll from '../components/services/CategoryScroll'
 import GuidanceCta from '../components/services/GuidanceCta'
 import ServiceCard from '../components/services/ServiceCard'
 import { SearchIcon } from '../components/icons/ServiceIcons'
 import { categories, popularServices } from '../data/servicesData'
+import { ROUTE_PATHS } from '../routes/routePaths'
+import type { ServiceItem } from '../data/servicesData'
 
 const CATEGORY_PARAM = 'category'
 
 function ServicesPage() {
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -37,6 +40,10 @@ function ServicesPage() {
     next.delete(CATEGORY_PARAM)
     setSearchParams(next, { replace: true })
   }, [searchParams, setSearchParams])
+
+  const handleServiceSelect = (service: ServiceItem) => {
+    navigate(`${ROUTE_PATHS.chat}?service=${service.id}`)
+  }
 
   const filteredServices = useMemo(() => {
     let results = popularServices
@@ -100,7 +107,7 @@ function ServicesPage() {
           </h2>
           <div className="space-y-3">
             {filteredServices.map((service) => (
-              <ServiceCard key={service.id} service={service} />
+              <ServiceCard key={service.id} service={service} onSelect={handleServiceSelect} />
             ))}
             {filteredServices.length === 0 && (
               <p className="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm text-gray-500">

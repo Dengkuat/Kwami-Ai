@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import SideMenu from '../components/SideMenu'
+import { useAppDispatch, useAppSelector } from '../hooks'
+import { setLanguage } from '../store/languageSlice'
 import { ROUTE_PATHS } from '../routes/routePaths'
-import { landingContent, type Language } from './landingContent'
+import { landingContent } from './landingContent'
 import './LandingPage.css'
 
 const featureIcons = {
@@ -38,7 +40,8 @@ const featureIcons = {
 
 function LandingPage() {
   const navigate = useNavigate()
-  const [language, setLanguage] = useState<Language>('kinyarwanda')
+  const dispatch = useAppDispatch()
+  const language = useAppSelector((state) => state.language.current)
   const [menuOpen, setMenuOpen] = useState(false)
   const t = landingContent[language]
 
@@ -94,7 +97,7 @@ function LandingPage() {
                 language === 'kinyarwanda' ? ' landing-language__option--active' : ''
               }`}
               aria-pressed={language === 'kinyarwanda'}
-              onClick={() => setLanguage('kinyarwanda')}
+              onClick={() => dispatch(setLanguage('kinyarwanda'))}
             >
               <span className="landing-language__option-title">Kinyarwanda</span>
               <span className="landing-language__option-sub">{t.kinyarwandaSub}</span>
@@ -105,7 +108,7 @@ function LandingPage() {
                 language === 'english' ? ' landing-language__option--active' : ''
               }`}
               aria-pressed={language === 'english'}
-              onClick={() => setLanguage('english')}
+              onClick={() => dispatch(setLanguage('english'))}
             >
               <span className="landing-language__option-title">English</span>
               <span className="landing-language__option-sub">{t.englishSub}</span>

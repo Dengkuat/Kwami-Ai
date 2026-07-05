@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import { loadChecklist, toggleItem } from '../store/checklistSlice'
+import { ROUTE_PATHS } from '../routes/routePaths'
 import './ChecklistPage.css'
 
 function DocumentIcon() {
@@ -40,6 +41,7 @@ function CheckIcon() {
 
 function ChecklistPage() {
   const dispatch = useAppDispatch()
+  const navigate = useNavigate()
   const { serviceId } = useParams<{ serviceId: string }>()
   const { applicationName, items } = useAppSelector((state) => state.checklist)
 
@@ -135,19 +137,39 @@ function ChecklistPage() {
       </main>
 
       <nav className="checklist-bottomnav" aria-label="Primary">
-        <button type="button" className="checklist-nav-item">
+        <button
+          type="button"
+          className="checklist-nav-item"
+          onClick={() => navigate(ROUTE_PATHS.landing)}
+        >
           <HomeIcon />
           <span>Home</span>
+        </button>
+        <button
+          type="button"
+          className="checklist-nav-item"
+          onClick={() => navigate(ROUTE_PATHS.services)}
+        >
+          <ServicesNavIcon />
+          <span>Services</span>
+        </button>
+        <button
+          type="button"
+          className="checklist-nav-item"
+          onClick={() => navigate(ROUTE_PATHS.chat)}
+        >
+          <ChatIcon />
+          <span>Chat</span>
         </button>
         <button type="button" className="checklist-nav-item is-active">
           <ListIcon />
           <span>Checklist</span>
         </button>
-        <button type="button" className="checklist-nav-item">
-          <ChatIcon />
-          <span>Chat</span>
-        </button>
-        <button type="button" className="checklist-nav-item">
+        <button
+          type="button"
+          className="checklist-nav-item"
+          onClick={() => navigate(ROUTE_PATHS.profile)}
+        >
           <UserIcon />
           <span>Profile</span>
         </button>
@@ -185,6 +207,17 @@ function ListIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  )
+}
+
+function ServicesNavIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   )
 }
