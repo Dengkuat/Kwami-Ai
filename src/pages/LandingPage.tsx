@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import SideMenu from '../components/SideMenu'
 import { buildChatLink, buildPresetChatLink } from '../data/chatPresets'
+import { useLanguage } from '../context/language'
 import { landingContent, type Language } from './landingContent'
 import './LandingPage.css'
 
@@ -38,14 +39,12 @@ const featureIcons = {
 
 function LandingPage() {
   const navigate = useNavigate()
-  const [language, setLanguage] = useState<Language>('kinyarwanda')
+  const { lang, setLang } = useLanguage()
   const [menuOpen, setMenuOpen] = useState(false)
+  const language: Language = lang === 'rw' ? 'kinyarwanda' : 'english'
+  const setLanguage = (next: Language) => setLang(next === 'kinyarwanda' ? 'rw' : 'en')
   const t = landingContent[language]
-  const langCode = language === 'kinyarwanda' ? 'rw' : 'en'
-
-  useEffect(() => {
-    document.documentElement.lang = language === 'kinyarwanda' ? 'rw' : 'en'
-  }, [language])
+  const langCode = lang
 
   return (
     <div className="landing-page">
