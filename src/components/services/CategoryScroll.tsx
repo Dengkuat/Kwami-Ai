@@ -1,32 +1,41 @@
-import { useState } from 'react'
 import type { CategoryItem } from '../../data/servicesData'
 import { ServiceIconGlyph } from '../icons/ServiceIcons'
 
 interface CategoryScrollProps {
   categories: CategoryItem[]
+  activeCategoryId: string | null
+  onCategorySelect: (categoryId: string) => void
+  onClearCategory: () => void
 }
 
-function CategoryScroll({ categories }: CategoryScrollProps) {
-  const [activeId, setActiveId] = useState(categories[0]?.id ?? '')
-
+function CategoryScroll({
+  categories,
+  activeCategoryId,
+  onCategorySelect,
+  onClearCategory,
+}: CategoryScrollProps) {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-base font-semibold text-gray-800">Categories</h2>
-        <button type="button" className="text-sm font-medium text-kwami-green hover:text-kwami-green-dark">
+        <button
+          type="button"
+          onClick={onClearCategory}
+          className="text-sm font-medium text-kwami-green hover:text-kwami-green-dark"
+        >
           See all
         </button>
       </div>
 
       <div className="scrollbar-hide -mx-4 flex gap-4 overflow-x-auto px-4 pb-1">
         {categories.map((category) => {
-          const isActive = category.id === activeId
+          const isActive = category.id === activeCategoryId
 
           return (
             <button
               key={category.id}
               type="button"
-              onClick={() => setActiveId(category.id)}
+              onClick={() => onCategorySelect(category.id)}
               className="flex w-[4.5rem] shrink-0 flex-col items-center gap-2"
             >
               <span
