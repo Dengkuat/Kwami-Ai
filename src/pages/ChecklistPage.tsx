@@ -100,10 +100,27 @@ function ChecklistPage() {
         </ul>
 
         <div className="checklist-actions">
-          <button type="button" className="checklist-btn checklist-btn-primary">
-            Save &amp; Exit
+          <button
+            type="button"
+            className="checklist-btn checklist-btn-primary"
+            onClick={() =>
+              window.location.href =
+              "https://irembo.gov.rw/user/citizen/service/nesa/application_for_equating_foreign_qualifications_for_general_education"
+            }
+          >
+            Go to Service
           </button>
-          <button type="button" className="checklist-btn checklist-btn-outline">
+
+          <button
+            type="button"
+            className="checklist-btn checklist-btn-outline"
+            onClick={() =>
+              window.open(
+                "https://www.google.com/maps/dir/ALX+Rwanda,+Deco+Center,+KG+9+Ave,+Kigali/Irembo+Campus+%26+Headquarters,+KG+517+Street,+Kigali/@-1.9345803,30.090429,3100m/data=!3m2!1e3!4b1!4m14!4m13!1m5!1m1!1s0x19dca7007bbe35ed:0xd2dff7bc3ca71163!2m2!1d30.0986948!2d-1.9270343!1m5!1m1!1s0x19dca7e1da543b6f:0x9a1d82d08ecd9558!2m2!1d30.1032144!2d-1.9416317!3e0",
+                "_blank"
+              )
+            }
+          >
             Find Office
           </button>
         </div>
