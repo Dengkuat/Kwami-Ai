@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import AppShell from '../components/layout/AppShell'
 import CategoryScroll from '../components/services/CategoryScroll'
 import GuidanceCta from '../components/services/GuidanceCta'
@@ -6,20 +7,62 @@ import ServiceCard from '../components/services/ServiceCard'
 import { SearchIcon } from '../components/icons/ServiceIcons'
 import { categories, popularServices } from '../data/servicesData'
 
+const CATEGORY_PARAM = 'category'
+
 function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const rawCategory = searchParams.get(CATEGORY_PARAM)
+  const activeCategory =
+    rawCategory && categories.some((category) => category.id === rawCategory)
+      ? rawCategory
+      : null
+
+  const handleCategorySelect = useCallback(
+    (categoryId: string) => {
+      const next = new URLSearchParams(searchParams)
+      if (categoryId === activeCategory) {
+        next.delete(CATEGORY_PARAM)
+      } else {
+        next.set(CATEGORY_PARAM, categoryId)
+      }
+      setSearchParams(next, { replace: true })
+    },
+    [activeCategory, searchParams, setSearchParams],
+  )
+
+  const handleClearCategory = useCallback(() => {
+    const next = new URLSearchParams(searchParams)
+    next.delete(CATEGORY_PARAM)
+    setSearchParams(next, { replace: true })
+  }, [searchParams, setSearchParams])
 
   const filteredServices = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
-    if (!query) return popularServices
+    let results = popularServices
 
-    return popularServices.filter(
-      (service) =>
-        service.name.toLowerCase().includes(query) ||
-        service.category.toLowerCase().includes(query) ||
-        service.description.toLowerCase().includes(query),
-    )
-  }, [searchQuery])
+    if (activeCategory) {
+      results = results.filter(
+        (service) => service.category.toLowerCase() === activeCategory,
+      )
+    }
+
+    const query = searchQuery.trim().toLowerCase()
+    if (query) {
+      results = results.filter(
+        (service) =>
+          service.name.toLowerCase().includes(query) ||
+          service.category.toLowerCase().includes(query) ||
+          service.description.toLowerCase().includes(query),
+      )
+    }
+
+    return results
+  }, [activeCategory, searchQuery])
+
+  const activeCategoryLabel = categories.find(
+    (category) => category.id === activeCategory,
+  )?.label
 
   return (
     <AppShell>
@@ -43,18 +86,29 @@ function ServicesPage() {
         </label>
 
         <div className="mb-7">
-          <CategoryScroll categories={categories} />
+          <CategoryScroll
+            categories={categories}
+            activeCategoryId={activeCategory}
+            onCategorySelect={handleCategorySelect}
+            onClearCategory={handleClearCategory}
+          />
         </div>
 
         <section className="mb-6">
-          <h2 className="mb-4 text-base font-semibold text-gray-800">Popular Services</h2>
+          <h2 className="mb-4 text-base font-semibold text-gray-800">
+            {activeCategoryLabel ? `${activeCategoryLabel} Services` : 'Popular Services'}
+          </h2>
           <div className="space-y-3">
             {filteredServices.map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))}
             {filteredServices.length === 0 && (
               <p className="rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm text-gray-500">
-                No services match your search.
+                {searchQuery.trim()
+                  ? 'No services match your search.'
+                  : activeCategoryLabel
+                    ? `No services found in ${activeCategoryLabel}.`
+                    : 'No services available.'}
               </p>
             )}
           </div>
