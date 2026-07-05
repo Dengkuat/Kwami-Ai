@@ -4,13 +4,11 @@ import ChecklistPage from '../pages/ChecklistPage'
 import LandingPage from '../pages/LandingPage'
 import ProfilePage from '../pages/ProfilePage'
 import ServicesPage from '../pages/ServicesPage'
-import Onboarding from '../components/onboarding/Onboarding'
 import { ROUTE_PATHS } from './routePaths'
 
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <Onboarding />
       <Routes>
         <Route path={ROUTE_PATHS.landing} element={<LandingPage />} />
         <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
