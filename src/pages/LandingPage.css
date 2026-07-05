@@ -134,7 +134,7 @@
   padding: 14px 16px;
   border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: #f3f4f6;
+  background: var(--color-surface);
   text-align: left;
   transition: border-color 0.15s, background-color 0.15s;
 }
@@ -199,16 +199,17 @@
   gap: 14px;
   width: 100%;
   padding: 16px;
-  border: none;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
   text-align: left;
-  transition: box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .landing-feature-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #d1d5db;
+  box-shadow: var(--shadow-card);
 }
 
 .landing-feature-card__icon {

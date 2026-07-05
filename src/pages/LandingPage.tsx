@@ -6,6 +6,12 @@ import { ROUTE_PATHS } from '../routes/routePaths'
 import { landingContent, type Language } from './landingContent'
 import './LandingPage.css'
 
+const featureRouteMap = {
+  chat: ROUTE_PATHS.chat,
+  services: ROUTE_PATHS.services,
+  checklist: ROUTE_PATHS.checklist,
+} as const
+
 const featureIcons = {
   irembo: {
     iconBg: '#dbeafe',
@@ -116,21 +122,21 @@ function LandingPage() {
         <button
           type="button"
           className="landing-cta"
-          onClick={() => navigate(ROUTE_PATHS.chat)}
+          onClick={() => navigate(ROUTE_PATHS.services)}
         >
           {t.cta}
           <span aria-hidden="true">→</span>
         </button>
 
         <section className="landing-features" aria-label={t.featuresAria}>
-          {t.features.map(({ id, title, description }) => {
+          {t.features.map(({ id, title, description, route }) => {
             const { iconBg, iconColor, icon } = featureIcons[id as keyof typeof featureIcons]
             return (
               <button
                 key={id}
                 type="button"
                 className="landing-feature-card"
-                onClick={() => navigate(ROUTE_PATHS.chat)}
+                onClick={() => navigate(featureRouteMap[route])}
               >
                 <span
                   className="landing-feature-card__icon"

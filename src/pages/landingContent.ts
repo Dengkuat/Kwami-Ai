@@ -18,16 +18,19 @@ export const landingContent = {
         title: 'Ubufasha bwa Irembo',
         description:
           'Amabwiriza y\'intambwe ku mpamyabumenyi y\'amavuko, indangamuntu, n\'uruhushya.',
+        route: 'chat' as const,
       },
       {
         id: 'health',
         title: 'Amakuru y\'Ubuzima',
         description: 'Shaka amakuru ku Mutuelle de Santé n\'ibitaro byo hafi.',
+        route: 'chat' as const,
       },
       {
         id: 'legal',
         title: 'Ubufasha mu By\'amategeko',
         description: 'Amakuru yoroshye ku burenganzira bwawe n\'amategeko ya Leta.',
+        route: 'chat' as const,
       },
     ],
     nav: {
@@ -57,16 +60,19 @@ export const landingContent = {
         id: 'irembo',
         title: 'Irembo Help',
         description: 'Step-by-step guidance for birth certificates, IDs, and permits.',
+        route: 'chat' as const,
       },
       {
         id: 'health',
         title: 'Health Info',
         description: 'Access information about Mutuelle de Santé and local clinics.',
+        route: 'chat' as const,
       },
       {
         id: 'legal',
         title: 'Legal Aid',
         description: 'Simplified information on your rights and public laws.',
+        route: 'chat' as const,
       },
     ],
     nav: {

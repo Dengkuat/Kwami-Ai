@@ -41,11 +41,11 @@
 }
 
 .bottom-nav__item--active {
-  color: #166534;
+  color: var(--color-primary);
 }
 
 .bottom-nav__item--active .bottom-nav__icon {
-  background: #166534;
+  background: var(--color-primary);
   color: #fff;
   border-radius: 50%;
   width: 40px;
