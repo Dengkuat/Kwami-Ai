@@ -76,8 +76,8 @@ function ServicesPage() {
 
   return (
     <AppShell>
-      <div className="px-4 pt-5">
-        <h2 className="mb-4 text-2xl font-bold leading-tight text-kwami-green-dark">
+      <div className="px-4 pt-5 sm:px-6 lg:px-0">
+        <h2 className="mb-4 text-2xl font-bold leading-tight text-kwami-green-dark sm:text-3xl">
           How can we help you today?
         </h2>
 
@@ -108,7 +108,7 @@ function ServicesPage() {
           <h2 className="mb-4 text-base font-semibold text-gray-800">
             {activeCategoryLabel ? `${activeCategoryLabel} Services` : 'Popular Services'}
           </h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {filteredServices.map((service) => (
               <ServiceCard
                 key={service.id}

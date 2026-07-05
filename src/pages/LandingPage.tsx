@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import BottomNav from '../components/BottomNav'
-import SideMenu from '../components/SideMenu'
+import AppShell from '../components/layout/AppShell'
 import { buildChatLink, buildPresetChatLink } from '../data/chatPresets'
 import { useLanguage } from '../context/language'
 import { landingContent, type Language } from './landingContent'
@@ -40,116 +38,88 @@ const featureIcons = {
 function LandingPage() {
   const navigate = useNavigate()
   const { lang, setLang } = useLanguage()
-  const [menuOpen, setMenuOpen] = useState(false)
   const language: Language = lang === 'rw' ? 'kinyarwanda' : 'english'
   const setLanguage = (next: Language) => setLang(next === 'kinyarwanda' ? 'rw' : 'en')
   const t = landingContent[language]
-  const langCode = lang
 
   return (
-    <div className="landing-page">
-      <SideMenu
-        isOpen={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        language={language}
-      />
-
-      <header className="landing-header">
-        <button
-          type="button"
-          className="landing-header__menu"
-          aria-label={t.menuLabel}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(true)}
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+    <AppShell mainClassName="landing-main">
+      <section className="landing-hero">
+        <div className="landing-hero__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="7" y="9" width="3" height="3" rx="0.5" />
+            <rect x="14" y="9" width="3" height="3" rx="0.5" />
+            <path d="M9 15h6v1.5c0 .83-.67 1.5-1.5 1.5h-3c-.83 0-1.5-.67-1.5-1.5V15z" />
           </svg>
-        </button>
-        <h1 className="landing-header__title">Kigali Kwima</h1>
-        <span className="landing-header__lang">{t.headerLang}</span>
-      </header>
+        </div>
+        <h2 className="landing-hero__title">{t.heroTitle}</h2>
+        <p className="landing-hero__subtitle">{t.heroSubtitle}</p>
+      </section>
 
-      <main className="landing-main">
-        <section className="landing-hero">
-          <div className="landing-hero__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <rect x="7" y="9" width="3" height="3" rx="0.5" />
-              <rect x="14" y="9" width="3" height="3" rx="0.5" />
-              <path d="M9 15h6v1.5c0 .83-.67 1.5-1.5 1.5h-3c-.83 0-1.5-.67-1.5-1.5V15z" />
-            </svg>
-          </div>
-          <h2 className="landing-hero__title">{t.heroTitle}</h2>
-          <p className="landing-hero__subtitle">{t.heroSubtitle}</p>
-        </section>
+      <section className="landing-language" aria-labelledby="language-heading">
+        <p id="language-heading" className="landing-language__label">
+          {t.languageLabel}
+        </p>
+        <div className="landing-language__options" role="group" aria-label={t.languageLabel}>
+          <button
+            type="button"
+            className={`landing-language__option${
+              language === 'kinyarwanda' ? ' landing-language__option--active' : ''
+            }`}
+            aria-pressed={language === 'kinyarwanda'}
+            onClick={() => setLanguage('kinyarwanda')}
+          >
+            <span className="landing-language__option-title">Kinyarwanda</span>
+            <span className="landing-language__option-sub">{t.kinyarwandaSub}</span>
+          </button>
+          <button
+            type="button"
+            className={`landing-language__option${
+              language === 'english' ? ' landing-language__option--active' : ''
+            }`}
+            aria-pressed={language === 'english'}
+            onClick={() => setLanguage('english')}
+          >
+            <span className="landing-language__option-title">English</span>
+            <span className="landing-language__option-sub">{t.englishSub}</span>
+          </button>
+        </div>
+      </section>
 
-        <section className="landing-language" aria-labelledby="language-heading">
-          <p id="language-heading" className="landing-language__label">
-            {t.languageLabel}
-          </p>
-          <div className="landing-language__options" role="group" aria-label={t.languageLabel}>
+      <button
+        type="button"
+        className="landing-cta"
+        onClick={() => navigate(buildChatLink({ language: lang }))}
+      >
+        {t.cta}
+        <span aria-hidden="true">→</span>
+      </button>
+
+      <section className="landing-features" aria-label={t.featuresAria}>
+        {t.features.map(({ id, title, description }) => {
+          const { iconBg, iconColor, icon } = featureIcons[id as keyof typeof featureIcons]
+          return (
             <button
+              key={id}
               type="button"
-              className={`landing-language__option${
-                language === 'kinyarwanda' ? ' landing-language__option--active' : ''
-              }`}
-              aria-pressed={language === 'kinyarwanda'}
-              onClick={() => setLanguage('kinyarwanda')}
+              className="landing-feature-card"
+              onClick={() => navigate(buildPresetChatLink(id, lang, title))}
             >
-              <span className="landing-language__option-title">Kinyarwanda</span>
-              <span className="landing-language__option-sub">{t.kinyarwandaSub}</span>
-            </button>
-            <button
-              type="button"
-              className={`landing-language__option${
-                language === 'english' ? ' landing-language__option--active' : ''
-              }`}
-              aria-pressed={language === 'english'}
-              onClick={() => setLanguage('english')}
-            >
-              <span className="landing-language__option-title">English</span>
-              <span className="landing-language__option-sub">{t.englishSub}</span>
-            </button>
-          </div>
-        </section>
-
-        <button
-          type="button"
-          className="landing-cta"
-          onClick={() => navigate(buildChatLink({ language: langCode }))}
-        >
-          {t.cta}
-          <span aria-hidden="true">→</span>
-        </button>
-
-        <section className="landing-features" aria-label={t.featuresAria}>
-          {t.features.map(({ id, title, description }) => {
-            const { iconBg, iconColor, icon } = featureIcons[id as keyof typeof featureIcons]
-            return (
-              <button
-                key={id}
-                type="button"
-                className="landing-feature-card"
-                onClick={() => navigate(buildPresetChatLink(id, langCode, title))}
+              <span
+                className="landing-feature-card__icon"
+                style={{ backgroundColor: iconBg, color: iconColor }}
               >
-                <span
-                  className="landing-feature-card__icon"
-                  style={{ backgroundColor: iconBg, color: iconColor }}
-                >
-                  {icon}
-                </span>
-                <span className="landing-feature-card__content">
-                  <span className="landing-feature-card__title">{title}</span>
-                  <span className="landing-feature-card__desc">{description}</span>
-                </span>
-              </button>
-            )
-          })}
-        </section>
-      </main>
-
-      <BottomNav language={language} />
-    </div>
+                {icon}
+              </span>
+              <span className="landing-feature-card__content">
+                <span className="landing-feature-card__title">{title}</span>
+                <span className="landing-feature-card__desc">{description}</span>
+              </span>
+            </button>
+          )
+        })}
+      </section>
+    </AppShell>
   )
 }
 

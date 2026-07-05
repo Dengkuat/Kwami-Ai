@@ -27,7 +27,7 @@ function CategoryScroll({
         </button>
       </div>
 
-      <div className="scrollbar-hide -mx-4 flex gap-4 overflow-x-auto px-4 pb-1">
+      <div className="scrollbar-hide -mx-4 flex gap-4 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 lg:grid lg:grid-cols-4 lg:gap-4 xl:grid-cols-6">
         {categories.map((category) => {
           const isActive = category.id === activeCategoryId
 
@@ -36,7 +36,7 @@ function CategoryScroll({
               key={category.id}
               type="button"
               onClick={() => onCategorySelect(category.id)}
-              className="flex w-[4.5rem] shrink-0 flex-col items-center gap-2"
+              className="flex w-[4.5rem] shrink-0 flex-col items-center gap-2 md:w-auto lg:w-full"
             >
               <span
                 className={`flex h-14 w-14 items-center justify-center rounded-2xl transition-colors ${

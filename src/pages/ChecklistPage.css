@@ -68,6 +68,20 @@
   letter-spacing: 0.5px;
 }
 
+.cl-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cl-page-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--kk-green);
+}
+
 .cl-tag {
   min-width: 26px;
   text-align: center;
@@ -75,14 +89,37 @@
   font-weight: 600;
   padding: 3px 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--kk-green-soft);
+  color: var(--kk-green);
 }
 
 .cl-body {
+  --kk-green: #1a6b42;
+  --kk-green-dark: #145a36;
+  --kk-green-soft: #e8f5ee;
+  --kk-ink: #10241a;
+  --kk-muted: #6b7b72;
+  --kk-line: #e4eae6;
+  --kk-danger: #dc2626;
+
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  text-align: left;
+  color: var(--kk-ink);
+}
+
+@media (min-width: 640px) {
+  .cl-body {
+    padding: 20px 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cl-body {
+    padding: 24px 0 32px;
+  }
 }
 
 /* Create new checklist */
@@ -152,9 +189,21 @@
 
 /* Stack of checklist cards */
 .cl-list-stack {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .cl-list-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .cl-list-stack {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .cl-card {

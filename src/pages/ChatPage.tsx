@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import MarkdownMessage from '../components/chat/MarkdownMessage'
-import ChatSidebar, { KwamiLogo, type ConversationSummary } from '../components/chat/ChatSidebar'
+import { KwimaLogo } from '../components/chat/ChatSidebar'
+import AppShell from '../components/layout/AppShell'
 import {
   sendChatMessage,
   streamChatMessage,
@@ -51,7 +52,7 @@ const UI_TEXT = {
     clear: 'Clear chat',
     save: 'Save as checklist',
     aiTools: 'AI Tools',
-    disclaimer: 'Kwami can make mistakes. Consider checking important information.',
+    disclaimer: 'Kwima can make mistakes. Consider checking important information.',
   },
   rw: {
     subtitle: 'Umuyobozi wawe wa serivisi za Leta y\'u Rwanda',
@@ -65,7 +66,7 @@ const UI_TEXT = {
     clear: 'Siba ikiganiro',
     save: 'Bika nk\'urutonde',
     aiTools: 'Ibikoresho bya AI',
-    disclaimer: 'Kwami ashobora kwibeshya. Genzura amakuru y\'ingenzi.',
+    disclaimer: 'Kwima ashobora kwibeshya. Genzura amakuru y\'ingenzi.',
   },
 } as const
 
@@ -190,7 +191,6 @@ function ChatPage() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [files, setFiles] = useState<File[]>([])
-  const [search, setSearch] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const messagesRef = useRef<HTMLDivElement>(null)
@@ -439,32 +439,9 @@ function ChatPage() {
     setActiveId(fresh.id)
   }
 
-  const handleSelectConversation = (id: string) => {
-    setActiveId(id)
-  }
-
-  const handleDeleteConversation = (id: string) => {
-    setConversations((prev) => {
-      const remaining = prev.filter((c) => c.id !== id)
-      const next = remaining.length > 0 ? remaining : [newConversation('New Chat')]
-      if (id === activeIdRef.current) {
-        setActiveId(next[0].id)
-      }
-      return next
-    })
-  }
-
   const handleClearChat = () => {
     updateConversationMessages(activeId, () => [])
   }
-
-  const summaries: ConversationSummary[] = useMemo(
-    () =>
-      conversations
-        .filter((c) => c.messages.length > 0 || c.id === activeId)
-        .map((c) => ({ id: c.id, title: c.title, updatedAt: c.updatedAt })),
-    [conversations, activeId],
-  )
 
   const lastMessage = messages[messages.length - 1]
   const headerTitle =
@@ -473,305 +450,240 @@ function ChatPage() {
       : UI_TEXT[lang].newChatTitle
 
   return (
-    <div className="relative flex h-dvh w-full overflow-hidden bg-white">
-      {/* Decorative background accents */}
-      <div className="pointer-events-none absolute -right-24 top-1/4 h-72 w-72 rounded-full bg-kwami-green-light/60 blur-3xl" />
-      <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-emerald-100/50 blur-3xl" />
-
-      {/* Sidebar (desktop) */}
-      <aside className="z-20 hidden lg:block">
-        <ChatSidebar
-          conversations={summaries}
-          activeId={activeId}
-          search={search}
-          onSearchChange={setSearch}
-          onSelect={handleSelectConversation}
-          onNewChat={handleNewChat}
-          onDelete={handleDeleteConversation}
-          onClose={() => {}}
-        />
-      </aside>
-
-      {/* Main area */}
-      <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-        {/* Header */}
-        <header className="flex items-center gap-3 border-b border-gray-100 px-4 py-3 sm:px-6">
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-base font-bold text-gray-800">{headerTitle}</h1>
-            <p className="truncate text-xs text-gray-400">{t.subtitle}</p>
-          </div>
-
-          {/* EN / RW toggle */}
-          <div className="flex overflow-hidden rounded-full border border-gray-200 bg-white">
+    <AppShell wide mainClassName="flex flex-col px-0 lg:px-6" contentClassName="max-w-none">
+      <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="border-b border-gray-100 px-4 py-3 sm:px-6">
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-base font-bold text-gray-800">{headerTitle}</h2>
+              <p className="truncate text-xs text-gray-400">{t.subtitle}</p>
+            </div>
             <button
               type="button"
-              onClick={() => setLang('en')}
-              className={`px-3 py-1 text-xs font-semibold ${
-                lang === 'en' ? 'bg-kwami-green text-white' : 'text-gray-500'
-              }`}
-              aria-pressed={lang === 'en'}
+              onClick={handleNewChat}
+              className="shrink-0 rounded-full bg-kwami-green px-3 py-1.5 text-xs font-semibold text-white hover:bg-kwami-green-dark"
             >
-              EN
+              {UI_TEXT[lang].newChatTitle}
+            </button>
+          </div>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={handleClearChat}
+              className="rounded-lg px-2 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100"
+            >
+              {t.clear}
             </button>
             <button
               type="button"
-              onClick={() => setLang('rw')}
-              className={`px-3 py-1 text-xs font-semibold ${
-                lang === 'rw' ? 'bg-kwami-green text-white' : 'text-gray-500'
-              }`}
-              aria-pressed={lang === 'rw'}
+              onClick={() => {
+                navigator.clipboard?.writeText(
+                  messages.map((m) => `${m.role === 'user' ? 'You' : 'Kwima'}: ${m.content}`).join('\n\n'),
+                )
+              }}
+              className="rounded-lg px-2 py-1.5 text-xs font-medium text-kwami-green hover:bg-kwami-green-light"
             >
-              RW
+              {t.share}
             </button>
           </div>
+        </div>
 
-          <button
-            type="button"
-            onClick={handleClearChat}
-            className="hidden rounded-lg p-2 text-gray-500 hover:bg-gray-100 sm:inline-flex"
-            aria-label={t.clear}
-            title={t.clear}
-          >
-            <Icon path="M6 7h12l-1 13H7L6 7zm3-3h6l1 2H8l1-2z" />
-          </button>
+        <div ref={messagesRef} className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 lg:px-8">
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <KwimaLogo className="mb-4 h-14 w-14 [&>svg]:h-8 [&>svg]:w-8" />
+              <h3 className="text-lg font-bold text-gray-800">{t.emptyTitle}</h3>
+              <p className="mt-1 max-w-sm text-sm text-gray-500">{t.emptyBody}</p>
+            </div>
+          )}
 
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard?.writeText(
-                messages.map((m) => `${m.role === 'user' ? 'You' : 'Kwami'}: ${m.content}`).join('\n\n'),
-              )
-            }}
-            className="hidden items-center gap-1.5 rounded-full bg-kwami-green px-4 py-2 text-sm font-semibold text-white hover:bg-kwami-green-dark sm:inline-flex"
-          >
-            <Icon path="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z" className="h-4 w-4" />
-            {t.share}
-          </button>
-        </header>
-
-        {/* Messages */}
-        <div ref={messagesRef} className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
-          <div className="mx-auto max-w-3xl">
-            {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <KwamiLogo className="mb-4 h-14 w-14 [&>svg]:h-8 [&>svg]:w-8" />
-                <h2 className="text-xl font-bold text-gray-800">{t.emptyTitle}</h2>
-                <p className="mt-1 max-w-sm text-sm text-gray-500">{t.emptyBody}</p>
-              </div>
-            )}
-
-            <div className="space-y-6">
-              {messages.map((message) => {
-                if (message.role === 'user') {
-                  return (
-                    <div key={message.id} className="flex justify-end">
-                      <div className="max-w-[85%] rounded-2xl rounded-br-md bg-kwami-green px-4 py-2.5 text-sm leading-relaxed text-white shadow-sm">
-                        {message.content}
-                      </div>
-                    </div>
-                  )
-                }
-
-                const isStreamingThis = isStreaming && message.id === lastMessage?.id
-                const isEmptyStreaming = message.content.length === 0 && isStreamingThis
-                const canSaveChecklist =
-                  !message.isError &&
-                  !isStreamingThis &&
-                  parseChecklistItems(message.content).length >= 2
-
+          <div className="space-y-5">
+            {messages.map((message) => {
+              if (message.role === 'user') {
                 return (
-                  <div key={message.id} className="flex gap-3">
-                    <span className="mt-0.5 shrink-0">
-                      <KwamiLogo className="h-8 w-8 [&>svg]:h-4 [&>svg]:w-4" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div
-                        className={`rounded-2xl rounded-tl-md border px-4 py-3 text-sm leading-relaxed shadow-sm ${
-                          message.isError
-                            ? 'border-red-200 bg-red-50 text-red-700'
-                            : 'border-gray-100 bg-white text-gray-800'
-                        }`}
-                      >
-                        {isEmptyStreaming ? (
-                          <div className="chat-typing" aria-label="Assistant is typing">
-                            <span />
-                            <span />
-                            <span />
-                          </div>
-                        ) : (
-                          <>
-                            <MarkdownMessage content={message.content} />
-                            {isStreamingThis && (
-                              <span className="chat-cursor" aria-hidden="true" />
-                            )}
-                          </>
-                        )}
-                      </div>
-
-                      {!isStreamingThis && !message.isError && message.content.length > 0 && (
-                        <div className="mt-2 flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(message)}
-                            className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                            aria-label="Copy"
-                            title="Copy"
-                          >
-                            {copiedId === message.id ? (
-                              <Icon path="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" className="h-4 w-4" />
-                            ) : (
-                              <Icon path="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" className="h-4 w-4" />
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleFeedback(message.id, 'up')}
-                            className={`rounded-lg p-1.5 transition hover:bg-gray-100 ${
-                              message.feedback === 'up' ? 'text-kwami-green' : 'text-gray-400 hover:text-gray-600'
-                            }`}
-                            aria-label="Good response"
-                            title="Good response"
-                          >
-                            <Icon path="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleFeedback(message.id, 'down')}
-                            className={`rounded-lg p-1.5 transition hover:bg-gray-100 ${
-                              message.feedback === 'down' ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'
-                            }`}
-                            aria-label="Bad response"
-                            title="Bad response"
-                          >
-                            <Icon path="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z" className="h-4 w-4" />
-                          </button>
-                          {canSaveChecklist && (
-                            <button
-                              type="button"
-                              onClick={() => handleSaveAsChecklist(message.content)}
-                              className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-kwami-green/30 bg-kwami-green-light px-3 py-1 text-xs font-semibold text-kwami-green-dark transition hover:bg-kwami-green hover:text-white"
-                            >
-                              <Icon path="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" className="h-3.5 w-3.5" />
-                              {t.save}
-                            </button>
-                          )}
-                        </div>
-                      )}
+                  <div key={message.id} className="flex justify-end">
+                    <div className="max-w-[85%] rounded-2xl rounded-br-md bg-kwami-green px-4 py-2.5 text-sm leading-relaxed text-white shadow-sm">
+                      {message.content}
                     </div>
                   </div>
                 )
-              })}
-            </div>
+              }
+
+              const isStreamingThis = isStreaming && message.id === lastMessage?.id
+              const isEmptyStreaming = message.content.length === 0 && isStreamingThis
+              const canSaveChecklist =
+                !message.isError &&
+                !isStreamingThis &&
+                parseChecklistItems(message.content).length >= 2
+
+              return (
+                <div key={message.id} className="flex gap-3">
+                  <span className="mt-0.5 shrink-0">
+                    <KwimaLogo className="h-8 w-8 [&>svg]:h-4 [&>svg]:w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div
+                      className={`rounded-2xl rounded-tl-md border px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                        message.isError
+                          ? 'border-red-200 bg-red-50 text-red-700'
+                          : 'border-gray-100 bg-white text-gray-800'
+                      }`}
+                    >
+                      {isEmptyStreaming ? (
+                        <div className="chat-typing" aria-label="Assistant is typing">
+                          <span />
+                          <span />
+                          <span />
+                        </div>
+                      ) : (
+                        <>
+                          <MarkdownMessage content={message.content} />
+                          {isStreamingThis && <span className="chat-cursor" aria-hidden="true" />}
+                        </>
+                      )}
+                    </div>
+
+                    {!isStreamingThis && !message.isError && message.content.length > 0 && (
+                      <div className="mt-2 flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(message)}
+                          className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+                          aria-label="Copy"
+                        >
+                          {copiedId === message.id ? (
+                            <Icon path="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" className="h-4 w-4" />
+                          ) : (
+                            <Icon path="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" className="h-4 w-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleFeedback(message.id, 'up')}
+                          className={`rounded-lg p-1.5 transition hover:bg-gray-100 ${
+                            message.feedback === 'up' ? 'text-kwami-green' : 'text-gray-400 hover:text-gray-600'
+                          }`}
+                          aria-label="Good response"
+                        >
+                          <Icon path="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleFeedback(message.id, 'down')}
+                          className={`rounded-lg p-1.5 transition hover:bg-gray-100 ${
+                            message.feedback === 'down' ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'
+                          }`}
+                          aria-label="Bad response"
+                        >
+                          <Icon path="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z" className="h-4 w-4" />
+                        </button>
+                        {canSaveChecklist && (
+                          <button
+                            type="button"
+                            onClick={() => handleSaveAsChecklist(message.content)}
+                            className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-kwami-green/30 bg-kwami-green-light px-3 py-1 text-xs font-semibold text-kwami-green-dark transition hover:bg-kwami-green hover:text-white"
+                          >
+                            <Icon path="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" className="h-3.5 w-3.5" />
+                            {t.save}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
         {error && (
-          <div className="mx-auto mb-2 w-full max-w-3xl px-4 sm:px-8">
+          <div className="px-4 pb-2">
             <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               {error}
             </div>
           </div>
         )}
 
-        {/* Composer */}
-        <div className="border-t border-gray-100 px-4 py-3 sm:px-8">
-          <div className="mx-auto max-w-3xl">
-            {/* Quick actions */}
-            <div className="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              {QUICK_ACTIONS.map((action) => (
-                <button
-                  key={action.label.en}
-                  type="button"
-                  onClick={() => handleQuickAction(action)}
-                  disabled={isStreaming}
-                  className="shrink-0 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition hover:border-kwami-green hover:bg-kwami-green-light hover:text-kwami-green-dark disabled:opacity-50"
+        <div className="border-t border-gray-100 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {QUICK_ACTIONS.map((action) => (
+              <button
+                key={action.label.en}
+                type="button"
+                onClick={() => handleQuickAction(action)}
+                disabled={isStreaming}
+                className="shrink-0 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-600 transition hover:border-kwami-green hover:bg-kwami-green-light hover:text-kwami-green-dark disabled:opacity-50"
+              >
+                {action.label[lang]}
+              </button>
+            ))}
+          </div>
+
+          {files.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {files.map((file, index) => (
+                <span
+                  key={`${file.name}-${index}`}
+                  className="inline-flex max-w-[180px] items-center gap-2 rounded-full bg-kwami-green-light px-3 py-1 text-xs text-kwami-green-dark"
                 >
-                  {action.label[lang]}
-                </button>
+                  <span className="truncate">{file.name}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${file.name}`}
+                    onClick={() => removeFile(index)}
+                    className="font-bold leading-none"
+                  >
+                    ×
+                  </button>
+                </span>
               ))}
             </div>
+          )}
 
-            {files.length > 0 && (
-              <div className="mb-2 flex flex-wrap gap-2">
-                {files.map((file, index) => (
-                  <span
-                    key={`${file.name}-${index}`}
-                    className="inline-flex max-w-[180px] items-center gap-2 rounded-full bg-kwami-green-light px-3 py-1 text-xs text-kwami-green-dark"
-                  >
-                    <span className="truncate">{file.name}</span>
-                    <button
-                      type="button"
-                      aria-label={`Remove ${file.name}`}
-                      onClick={() => removeFile(index)}
-                      className="font-bold leading-none"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <form
-              onSubmit={handleSubmit}
-              className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-sm focus-within:border-kwami-green focus-within:ring-2 focus-within:ring-kwami-green/15"
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-sm focus-within:border-kwami-green focus-within:ring-2 focus-within:ring-kwami-green/15"
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,application/pdf"
+              className="hidden"
+              onChange={handleFilesSelected}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              aria-label="Attach file"
             >
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*,application/pdf"
-                className="hidden"
-                onChange={handleFilesSelected}
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                aria-label="Attach file"
-                title="Attach file"
-              >
-                <Icon path="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6h-1.5z" />
-              </button>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600 sm:flex"
-                aria-label="Add image"
-                title="Add image"
-              >
-                <Icon path="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-              </button>
+              <Icon path="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6h-1.5z" />
+            </button>
 
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={t.placeholder}
-                rows={1}
-                className="max-h-32 min-h-[2.25rem] flex-1 resize-none border-none bg-transparent px-1 py-2 text-sm text-gray-800 outline-none placeholder:text-gray-400"
-              />
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={t.placeholder}
+              rows={1}
+              className="max-h-32 min-h-[2.25rem] flex-1 resize-none border-none bg-transparent px-1 py-2 text-sm text-gray-800 outline-none placeholder:text-gray-400"
+            />
 
-              <span className="hidden shrink-0 items-center gap-1 rounded-full bg-kwami-green-light px-3 py-1.5 text-xs font-semibold text-kwami-green-dark sm:inline-flex">
-                <Icon path="M12 2l1.9 5.8L20 9l-4.9 3.6L17 20l-5-3.6L7 20l1.9-7.4L4 9l6.1-1.2L12 2z" className="h-3.5 w-3.5" />
-                {t.aiTools}
-              </span>
+            <button
+              type="submit"
+              disabled={isStreaming || (input.trim().length === 0 && files.length === 0)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-kwami-green text-white transition hover:bg-kwami-green-dark disabled:opacity-40"
+              aria-label="Send message"
+            >
+              <Icon path="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" className="h-5 w-5" />
+            </button>
+          </form>
 
-              <button
-                type="submit"
-                disabled={isStreaming || (input.trim().length === 0 && files.length === 0)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-kwami-green text-white transition hover:bg-kwami-green-dark disabled:opacity-40"
-                aria-label="Send message"
-              >
-                <Icon path="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" className="h-5 w-5" />
-              </button>
-            </form>
-
-            <p className="mt-2 text-center text-xs text-gray-400">{t.disclaimer}</p>
-          </div>
+          <p className="mt-2 text-center text-xs text-gray-400">{t.disclaimer}</p>
         </div>
       </div>
-    </div>
+    </AppShell>
   )
 }
 

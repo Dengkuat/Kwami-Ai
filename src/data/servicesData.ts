@@ -21,6 +21,7 @@ export interface CategoryItem {
 
 export interface ServiceItem {
   id: string
+  backendId?: string
   name: string
   category: ServiceCategory
   description: string

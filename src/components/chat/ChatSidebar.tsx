@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../../context/language'
+import { APP_NAME } from '../../config/brand'
 import { DEMO_PROFILE } from '../../data/demoProfile'
 import { ROUTE_PATHS } from '../../routes/routePaths'
 
@@ -60,7 +61,7 @@ function relativeTime(ts: number, lang: 'en' | 'rw'): string {
   return `${days}d`
 }
 
-export function KwamiLogo({ className = '' }: { className?: string }) {
+export function KwimaLogo({ className = '' }: { className?: string }) {
   return (
     <span
       className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-kwami-green to-emerald-500 text-white shadow-sm ${className}`}
@@ -111,8 +112,8 @@ function ChatSidebar({
           onClick={() => navigate(ROUTE_PATHS.landing)}
           className="flex items-center gap-2.5"
         >
-          <KwamiLogo />
-          <span className="text-lg font-bold text-kwami-green-dark">Kwami AI</span>
+          <KwimaLogo />
+          <span className="text-lg font-bold text-kwami-green-dark">{APP_NAME}</span>
         </button>
         <button
           type="button"

@@ -4,7 +4,7 @@ export const landingContent = {
   kinyarwanda: {
     headerLang: 'Ikinyarwanda',
     menuLabel: 'Fungura menu',
-    heroTitle: 'Muraho! Ikaze muri Kigali Kwima.',
+    heroTitle: 'Muraho! Ikaze muri Kwima.',
     heroSubtitle:
       'Umuyobozi wawe wa AI w\'ibikorwa bya Leta y\'u Rwanda. Yizewe, yihuse, kandi irashoboka mu rurimi ukoresha.',
     languageLabel: 'Hitamo ururimi rwawe',
@@ -45,7 +45,7 @@ export const landingContent = {
   english: {
     headerLang: 'English',
     menuLabel: 'Open menu',
-    heroTitle: 'Muraho! Welcome to Kigali Kwima.',
+    heroTitle: 'Muraho! Welcome to Kwima.',
     heroSubtitle:
       'Your AI guide to Rwandan government services. Reliable, fast, and accessible in the language of your choice.',
     languageLabel: 'Select your language',

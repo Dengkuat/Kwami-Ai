@@ -1,24 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useLanguage } from '../../context/language'
 import { landingContent } from '../../pages/landingContent'
-import { ROUTE_PATHS } from '../../routes/routePaths'
-import {
-  ChatIcon,
-  ChecklistIcon,
-  HomeIcon,
-  ProfileIcon,
-  ServicesIcon,
-} from '../icons/ServiceIcons'
-
-type NavTab = 'home' | 'services' | 'chat' | 'checklist' | 'profile'
-
-const navItems: { id: NavTab; to: string; icon: typeof HomeIcon }[] = [
-  { id: 'home', to: ROUTE_PATHS.landing, icon: HomeIcon },
-  { id: 'services', to: ROUTE_PATHS.services, icon: ServicesIcon },
-  { id: 'chat', to: ROUTE_PATHS.chat, icon: ChatIcon },
-  { id: 'checklist', to: ROUTE_PATHS.checklist, icon: ChecklistIcon },
-  { id: 'profile', to: ROUTE_PATHS.profile, icon: ProfileIcon },
-]
+import { navItems } from './navConfig'
 
 function BottomNav() {
   const { lang } = useLanguage()
@@ -26,13 +9,16 @@ function BottomNav() {
   const t = landingContent[language]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-gray-100 bg-white">
-      <div className="mx-auto flex h-[4.5rem] max-w-md items-center justify-around px-1">
-        {navItems.map(({ id, to, icon: Icon }) => (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-20 border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 lg:hidden"
+      aria-label={t.navAria}
+    >
+      <div className="mx-auto flex h-[4.5rem] w-full max-w-[430px] items-center justify-around px-1 pb-[env(safe-area-inset-bottom)] sm:max-w-xl md:max-w-2xl">
+        {navItems.map(({ id, to, end, icon: Icon }) => (
           <NavLink
             key={id}
             to={to}
-            end={to === ROUTE_PATHS.landing}
+            end={end}
             className="flex flex-1 flex-col items-center justify-center"
           >
             {({ isActive }) => (
@@ -42,7 +28,9 @@ function BottomNav() {
                 }`}
               >
                 <Icon active={isActive} />
-                <span className={`text-[10px] font-medium sm:text-xs ${isActive ? 'text-white' : 'text-gray-500'}`}>
+                <span
+                  className={`text-[10px] font-medium sm:text-xs ${isActive ? 'text-white' : 'text-gray-500'}`}
+                >
                   {t.nav[id]}
                 </span>
               </div>

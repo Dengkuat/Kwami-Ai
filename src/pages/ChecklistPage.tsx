@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import AppShell from '../components/layout/AppShell'
 import { useAppDispatch, useAppSelector } from '../hooks'
 import {
   addChecklist,
@@ -12,16 +12,7 @@ import {
   toggleItem,
   type Checklist,
 } from '../store/checklistSlice'
-import { ROUTE_PATHS } from '../routes/routePaths'
 import './ChecklistPage.css'
-
-function BackIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z" />
-    </svg>
-  )
-}
 
 function PlusIcon() {
   return (
@@ -159,7 +150,6 @@ function ChecklistCard({ list }: { list: Checklist }) {
 
 function ChecklistPage() {
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
   const lists = useAppSelector((state) => state.checklist.lists)
   const [newTitle, setNewTitle] = useState('')
 
@@ -172,24 +162,13 @@ function ChecklistPage() {
   }
 
   return (
-    <div className="cl-screen">
-      <header className="cl-topbar">
-        <button
-          type="button"
-          className="cl-back"
-          aria-label="Go back"
-          onClick={() => navigate(ROUTE_PATHS.landing)}
-        >
-          <BackIcon />
-        </button>
-        <div className="cl-brand">
-          <span className="cl-logo">KK</span>
-          <span>My Checklists</span>
+    <AppShell>
+      <div className="cl-body">
+        <div className="cl-page-head">
+          <h2 className="cl-page-title">My Checklists</h2>
+          <span className="cl-tag">{lists.length}</span>
         </div>
-        <span className="cl-tag">{lists.length}</span>
-      </header>
 
-      <main className="cl-body">
         <form className="cl-create" onSubmit={handleCreate}>
           <input
             className="cl-create-input"
@@ -215,8 +194,8 @@ function ChecklistPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AppShell>
   )
 }
 
