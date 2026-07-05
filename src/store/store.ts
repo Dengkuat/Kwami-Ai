@@ -1,9 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
-
-const emptyRootReducer = (state = {}) => state
+import checklistReducer from './checklistSlice'
 
 export const store = configureStore({
-  reducer: emptyRootReducer,
+  reducer: {
+    checklist: checklistReducer,
+  },
 })
 
 export type RootState = ReturnType<typeof store.getState>

@@ -14,6 +14,7 @@ function AppRoutes() {
         <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
         <Route path={ROUTE_PATHS.chat} element={<ChatPage />} />
         <Route path={ROUTE_PATHS.checklist} element={<ChecklistPage />} />
+        <Route path={`${ROUTE_PATHS.checklist}/:serviceId`} element={<ChecklistPage />} />
         <Route path={ROUTE_PATHS.profile} element={<ProfilePage />} />
         <Route path="*" element={<Navigate to={ROUTE_PATHS.landing} replace />} />
       </Routes>
