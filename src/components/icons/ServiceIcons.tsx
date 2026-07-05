@@ -122,6 +122,36 @@ export function ChatIcon({ active }: { active?: boolean }) {
   )
 }
 
+export function ChecklistIcon({ active }: { active?: boolean }) {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect
+        x="5"
+        y="4"
+        width="14"
+        height="16"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        fill={active ? 'currentColor' : 'none'}
+      />
+      <path
+        d="m8.5 11 1.5 1.5L13 9.5"
+        stroke={active ? '#fff' : 'currentColor'}
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.5 16h7"
+        stroke={active ? '#fff' : 'currentColor'}
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function ProfileIcon({ active }: { active?: boolean }) {
   return (
     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">

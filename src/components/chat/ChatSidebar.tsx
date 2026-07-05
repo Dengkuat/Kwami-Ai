@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../../context/language'
+import { DEMO_PROFILE } from '../../data/demoProfile'
 import { ROUTE_PATHS } from '../../routes/routePaths'
 
 export interface ConversationSummary {
@@ -236,15 +237,19 @@ function ChatSidebar({
 
       {/* User card */}
       <div className="border-t border-gray-100 p-3">
-        <div className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-gray-50">
+        <button
+          type="button"
+          onClick={() => navigate(ROUTE_PATHS.profile)}
+          className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-gray-50"
+        >
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-kwami-green-light font-semibold text-kwami-green">
-            K
+            {DEMO_PROFILE.initials}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-gray-800">{t.user}</p>
-            <p className="truncate text-xs text-gray-400">{t.plan}</p>
+            <p className="truncate text-sm font-semibold text-gray-800">{DEMO_PROFILE.name}</p>
+            <p className="truncate text-xs text-gray-400">{DEMO_PROFILE.email}</p>
           </div>
-        </div>
+        </button>
       </div>
     </div>
   )

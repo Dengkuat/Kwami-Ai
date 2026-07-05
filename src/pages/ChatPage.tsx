@@ -190,7 +190,6 @@ function ChatPage() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [files, setFiles] = useState<File[]>([])
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
@@ -432,7 +431,6 @@ function ChatPage() {
   }
 
   const handleNewChat = () => {
-    setSidebarOpen(false)
     // Reuse the active conversation if it's already empty.
     const active = convosRef.current.find((c) => c.id === activeIdRef.current)
     if (active && active.messages.length === 0) return
@@ -443,7 +441,6 @@ function ChatPage() {
 
   const handleSelectConversation = (id: string) => {
     setActiveId(id)
-    setSidebarOpen(false)
   }
 
   const handleDeleteConversation = (id: string) => {
@@ -491,47 +488,14 @@ function ChatPage() {
           onSelect={handleSelectConversation}
           onNewChat={handleNewChat}
           onDelete={handleDeleteConversation}
-          onClose={() => setSidebarOpen(false)}
+          onClose={() => {}}
         />
       </aside>
-
-      {/* Sidebar drawer (mobile) */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <button
-            type="button"
-            aria-label="Close menu"
-            className="absolute inset-0 bg-black/30"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className="absolute inset-y-0 left-0 shadow-xl">
-            <ChatSidebar
-              conversations={summaries}
-              activeId={activeId}
-              search={search}
-              onSearchChange={setSearch}
-              onSelect={handleSelectConversation}
-              onNewChat={handleNewChat}
-              onDelete={handleDeleteConversation}
-              onClose={() => setSidebarOpen(false)}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Main area */}
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         {/* Header */}
         <header className="flex items-center gap-3 border-b border-gray-100 px-4 py-3 sm:px-6">
-          <button
-            type="button"
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
-            aria-label="Open menu"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Icon path="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-          </button>
-
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-base font-bold text-gray-800">{headerTitle}</h1>
             <p className="truncate text-xs text-gray-400">{t.subtitle}</p>
