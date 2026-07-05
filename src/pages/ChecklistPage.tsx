@@ -1,26 +1,40 @@
-import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../hooks'
-import { loadChecklist, toggleItem } from '../store/checklistSlice'
+import {
+  addChecklist,
+  addItem,
+  clearCompleted,
+  deleteChecklist,
+  editItem,
+  removeItem,
+  renameChecklist,
+  toggleItem,
+  type Checklist,
+} from '../store/checklistSlice'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import './ChecklistPage.css'
 
-function DocumentIcon() {
+function BackIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path d="M14 3v5h5" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path
-        d="M8.5 13h7M8.5 16.5h4"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z" />
+    </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z" />
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M6 7h12l-1 13H7L6 7zm3-3h6l1 2H8l1-2zM4 6h16v1H4V6z" />
     </svg>
   )
 }
@@ -31,221 +45,178 @@ function CheckIcon() {
       <path
         d="M5 12.5 10 17.5 19 7"
         stroke="currentColor"
-        strokeWidth="2.4"
+        strokeWidth="2.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
+  )
+}
+
+function ChecklistCard({ list }: { list: Checklist }) {
+  const dispatch = useAppDispatch()
+  const [newItem, setNewItem] = useState('')
+
+  const total = list.items.length
+  const done = list.items.filter((i) => i.done).length
+  const progress = total === 0 ? 0 : Math.round((done / total) * 100)
+
+  const handleAddItem = (e: React.FormEvent) => {
+    e.preventDefault()
+    const text = newItem.trim()
+    if (!text) return
+    dispatch(addItem({ listId: list.id, text }))
+    setNewItem('')
+  }
+
+  return (
+    <section className="cl-card">
+      <div className="cl-card-head">
+        <input
+          className="cl-title-input"
+          value={list.title}
+          aria-label="Checklist title"
+          onChange={(e) => dispatch(renameChecklist({ listId: list.id, title: e.target.value }))}
+        />
+        <button
+          type="button"
+          className="cl-icon-btn cl-danger"
+          aria-label="Delete checklist"
+          onClick={() => dispatch(deleteChecklist(list.id))}
+        >
+          <TrashIcon />
+        </button>
+      </div>
+
+      <div className="cl-progress-row">
+        <span className="cl-progress-label">
+          {done}/{total} done
+        </span>
+        <span className="cl-progress-badge">{progress}%</span>
+      </div>
+      <div className="cl-progress-bar">
+        <div className="cl-progress-fill" style={{ width: `${progress}%` }} />
+      </div>
+
+      <ul className="cl-items">
+        {list.items.map((item) => (
+          <li key={item.id} className={`cl-item ${item.done ? 'is-done' : ''}`}>
+            <button
+              type="button"
+              className="cl-check"
+              role="checkbox"
+              aria-checked={item.done}
+              aria-label={item.done ? 'Mark as not done' : 'Mark as done'}
+              onClick={() => dispatch(toggleItem({ listId: list.id, itemId: item.id }))}
+            >
+              {item.done && <CheckIcon />}
+            </button>
+            <input
+              className="cl-item-input"
+              value={item.text}
+              aria-label="Checklist item"
+              onChange={(e) =>
+                dispatch(editItem({ listId: list.id, itemId: item.id, text: e.target.value }))
+              }
+            />
+            <button
+              type="button"
+              className="cl-icon-btn cl-item-remove"
+              aria-label="Remove item"
+              onClick={() => dispatch(removeItem({ listId: list.id, itemId: item.id }))}
+            >
+              ×
+            </button>
+          </li>
+        ))}
+        {list.items.length === 0 && <li className="cl-empty-items">No items yet. Add one below.</li>}
+      </ul>
+
+      <form className="cl-add-item" onSubmit={handleAddItem}>
+        <input
+          className="cl-add-input"
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+          placeholder="Add an item…"
+        />
+        <button type="submit" className="cl-add-btn" aria-label="Add item" disabled={!newItem.trim()}>
+          <PlusIcon />
+        </button>
+      </form>
+
+      {done > 0 && (
+        <button
+          type="button"
+          className="cl-clear-btn"
+          onClick={() => dispatch(clearCompleted(list.id))}
+        >
+          Clear completed ({done})
+        </button>
+      )}
+    </section>
   )
 }
 
 function ChecklistPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { serviceId } = useParams<{ serviceId: string }>()
-  const { applicationName, items } = useAppSelector((state) => state.checklist)
+  const lists = useAppSelector((state) => state.checklist.lists)
+  const [newTitle, setNewTitle] = useState('')
 
-  useEffect(() => {
-    if (serviceId) {
-      dispatch(loadChecklist(serviceId))
-    }
-  }, [serviceId, dispatch])
-
-  const completedCount = items.filter((item) => item.completed).length
-  const totalCount = items.length
-  const progress = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100)
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault()
+    const title = newTitle.trim()
+    if (!title) return
+    dispatch(addChecklist({ title }))
+    setNewTitle('')
+  }
 
   return (
-    <div className="checklist-screen">
-      <header className="checklist-topbar">
-        <div className="checklist-brand">
-          <span className="checklist-logo">KK</span>
-          <span>Kigali Kwima</span>
-        </div>
-        <span className="checklist-tag">Government</span>
-      </header>
-
-      <main className="checklist-body">
-        <div className="checklist-heading">
-          <h2>Checklist: {applicationName}</h2>
-          <div className="checklist-progress-row">
-            <p className="checklist-progress-label">
-              {completedCount} of {totalCount} items completed
-            </p>
-            <span className="checklist-progress-badge">{progress}%</span>
-          </div>
-          <div className="checklist-progress-bar">
-            <div className="checklist-progress-fill" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-
-        <ul className="checklist-items">
-          {items.map((item) => (
-            <li key={item.id}>
-              <button
-                type="button"
-                className={`checklist-item ${item.completed ? 'is-complete' : ''}`}
-                onClick={() => dispatch(toggleItem(item.id))}
-                aria-pressed={item.completed}
-              >
-                <span className="checklist-item-icon">
-                  <DocumentIcon />
-                </span>
-                <span className="checklist-item-text">
-                  <span className="checklist-item-title">{item.title}</span>
-                  <span className="checklist-item-desc">{item.description}</span>
-                </span>
-                <span className="checklist-item-check">{item.completed && <CheckIcon />}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div className="checklist-actions">
-          <button
-            type="button"
-            className="checklist-btn checklist-btn-primary"
-            onClick={() =>
-              window.location.href =
-              "https://irembo.gov.rw/user/citizen/service/nesa/application_for_equating_foreign_qualifications_for_general_education"
-            }
-          >
-            Go to Service
-          </button>
-
-          <button
-            type="button"
-            className="checklist-btn checklist-btn-outline"
-            onClick={() =>
-              window.open(
-                "https://www.google.com/maps/dir/ALX+Rwanda,+Deco+Center,+KG+9+Ave,+Kigali/Irembo+Campus+%26+Headquarters,+KG+517+Street,+Kigali/@-1.9345803,30.090429,3100m/data=!3m2!1e3!4b1!4m14!4m13!1m5!1m1!1s0x19dca7007bbe35ed:0xd2dff7bc3ca71163!2m2!1d30.0986948!2d-1.9270343!1m5!1m1!1s0x19dca7e1da543b6f:0x9a1d82d08ecd9558!2m2!1d30.1032144!2d-1.9416317!3e0",
-                "_blank"
-              )
-            }
-          >
-            Find Office
-          </button>
-        </div>
-
-        <div className="checklist-note">
-          <span className="checklist-note-icon">!</span>
-          <p>
-            Once all documents are ready, you can book an appointment at your nearest office to
-            complete your application.
-          </p>
-        </div>
-      </main>
-
-      <nav className="checklist-bottomnav" aria-label="Primary">
+    <div className="cl-screen">
+      <header className="cl-topbar">
         <button
           type="button"
-          className="checklist-nav-item"
+          className="cl-back"
+          aria-label="Go back"
           onClick={() => navigate(ROUTE_PATHS.landing)}
         >
-          <HomeIcon />
-          <span>Home</span>
+          <BackIcon />
         </button>
-        <button
-          type="button"
-          className="checklist-nav-item"
-          onClick={() => navigate(ROUTE_PATHS.services)}
-        >
-          <ServicesNavIcon />
-          <span>Services</span>
-        </button>
-        <button
-          type="button"
-          className="checklist-nav-item"
-          onClick={() => navigate(ROUTE_PATHS.chat)}
-        >
-          <ChatIcon />
-          <span>Chat</span>
-        </button>
-        <button type="button" className="checklist-nav-item is-active">
-          <ListIcon />
-          <span>Checklist</span>
-        </button>
-        <button
-          type="button"
-          className="checklist-nav-item"
-          onClick={() => navigate(ROUTE_PATHS.profile)}
-        >
-          <UserIcon />
-          <span>Profile</span>
-        </button>
-      </nav>
+        <div className="cl-brand">
+          <span className="cl-logo">KK</span>
+          <span>My Checklists</span>
+        </div>
+        <span className="cl-tag">{lists.length}</span>
+      </header>
+
+      <main className="cl-body">
+        <form className="cl-create" onSubmit={handleCreate}>
+          <input
+            className="cl-create-input"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="New checklist title…"
+          />
+          <button type="submit" className="cl-create-btn" disabled={!newTitle.trim()}>
+            <PlusIcon />
+            <span>Add</span>
+          </button>
+        </form>
+
+        {lists.length === 0 ? (
+          <div className="cl-empty">
+            <p>No checklists yet.</p>
+            <p className="cl-empty-hint">Create one above to start tracking your documents.</p>
+          </div>
+        ) : (
+          <div className="cl-list-stack">
+            {lists.map((list) => (
+              <ChecklistCard key={list.id} list={list} />
+            ))}
+          </div>
+        )}
+      </main>
     </div>
-  )
-}
-
-function HomeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1v-8.5Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function ListIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M9 6h11M9 12h11M9 18h11"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="m4 6 1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function ServicesNavIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-    </svg>
-  )
-}
-
-function ChatIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function UserIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.6" />
-      <path
-        d="M5 19a7 7 0 0 1 14 0"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
   )
 }
 

@@ -1,8 +1,14 @@
 import { NavLink } from 'react-router-dom'
-import { ROUTE_PATHS } from '../../routes/routePaths'
-import { useAppSelector } from '../../hooks'
+import { useLanguage } from '../../context/language'
 import { landingContent } from '../../pages/landingContent'
-import { ChatIcon, ChecklistIcon, HomeIcon, ProfileIcon, ServicesIcon } from '../icons/ServiceIcons'
+import { ROUTE_PATHS } from '../../routes/routePaths'
+import {
+  ChatIcon,
+  ChecklistIcon,
+  HomeIcon,
+  ProfileIcon,
+  ServicesIcon,
+} from '../icons/ServiceIcons'
 
 type NavTab = 'home' | 'services' | 'chat' | 'checklist' | 'profile'
 
@@ -15,12 +21,13 @@ const navItems: { id: NavTab; to: string; icon: typeof HomeIcon }[] = [
 ]
 
 function BottomNav() {
-  const language = useAppSelector((state) => state.language.current)
+  const { lang } = useLanguage()
+  const language = lang === 'rw' ? 'kinyarwanda' : 'english'
   const t = landingContent[language]
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-gray-100 bg-white">
-      <div className="mx-auto flex h-[4.5rem] max-w-md items-center justify-around px-2">
+      <div className="mx-auto flex h-[4.5rem] max-w-md items-center justify-around px-1">
         {navItems.map(({ id, to, icon: Icon }) => (
           <NavLink
             key={id}
@@ -30,12 +37,12 @@ function BottomNav() {
           >
             {({ isActive }) => (
               <div
-                className={`flex flex-col items-center gap-1 rounded-full px-3 py-2 transition-colors ${
+                className={`flex flex-col items-center gap-1 rounded-full px-2 py-2 transition-colors sm:px-3 ${
                   isActive ? 'bg-kwami-green text-white' : 'text-gray-500'
                 }`}
               >
                 <Icon active={isActive} />
-                <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-gray-500'}`}>
+                <span className={`text-[10px] font-medium sm:text-xs ${isActive ? 'text-white' : 'text-gray-500'}`}>
                   {t.nav[id]}
                 </span>
               </div>

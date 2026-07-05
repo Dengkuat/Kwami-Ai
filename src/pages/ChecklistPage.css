@@ -1,47 +1,62 @@
-.checklist-screen {
-  --kk-green: #0e7a3b;
-  --kk-green-dark: #0a6231;
-  --kk-green-soft: #e7f4ec;
+.cl-screen {
+  --kk-green: #1a6b42;
+  --kk-green-dark: #145a36;
+  --kk-green-soft: #e8f5ee;
   --kk-ink: #10241a;
   --kk-muted: #6b7b72;
   --kk-line: #e4eae6;
-  --kk-amber-bg: #fdf3d6;
-  --kk-amber-line: #f2d98a;
-  --kk-amber-ink: #7a5a12;
+  --kk-danger: #dc2626;
 
   width: 100%;
-  max-width: 420px;
-  margin: 24px auto;
-  background: #fff;
-  border: 1px solid var(--kk-line);
-  border-radius: 22px;
-  box-shadow: 0 18px 40px -24px rgba(14, 122, 59, 0.45);
-  overflow: hidden;
+  max-width: var(--app-max-width, 430px);
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--color-bg, #f9fafb);
   display: flex;
   flex-direction: column;
   text-align: left;
   color: var(--kk-ink);
-  font-family: var(--sans);
 }
 
-.checklist-topbar {
+.cl-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 18px;
+  gap: 12px;
+  padding: 14px 16px;
   background: var(--kk-green);
   color: #fff;
 }
 
-.checklist-brand {
+.cl-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.cl-back svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cl-brand {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
   font-weight: 600;
   font-size: 16px;
 }
 
-.checklist-logo {
+.cl-logo {
   display: grid;
   place-items: center;
   width: 30px;
@@ -53,247 +68,324 @@
   letter-spacing: 0.5px;
 }
 
-.checklist-tag {
-  font-size: 12px;
-  padding: 4px 10px;
+.cl-tag {
+  min-width: 26px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.checklist-body {
-  padding: 20px 18px 22px;
+.cl-body {
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
-.checklist-heading h2 {
-  margin: 0 0 12px;
-  font-size: 19px;
+/* Create new checklist */
+.cl-create {
+  display: flex;
+  gap: 8px;
+}
+
+.cl-create-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--kk-line);
+  border-radius: 12px;
+  padding: 11px 14px;
+  font: inherit;
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+}
+
+.cl-create-input:focus {
+  border-color: var(--kk-green);
+  box-shadow: 0 0 0 3px rgba(26, 107, 66, 0.12);
+}
+
+.cl-create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 12px;
+  padding: 0 16px;
+  background: var(--kk-green);
+  color: #fff;
   font-weight: 600;
-  color: var(--kk-ink);
-  letter-spacing: -0.2px;
+  font-size: 14px;
 }
 
-.checklist-progress-row {
+.cl-create-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cl-create-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Empty state */
+.cl-empty {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--kk-muted);
+  background: #fff;
+  border: 1px dashed var(--kk-line);
+  border-radius: 16px;
+}
+
+.cl-empty p {
+  margin: 0;
+}
+
+.cl-empty-hint {
+  margin-top: 6px !important;
+  font-size: 13px;
+}
+
+/* Stack of checklist cards */
+.cl-list-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cl-card {
+  background: #fff;
+  border: 1px solid var(--kk-line);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cl-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cl-title-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--kk-ink);
+  background: transparent;
+  outline: none;
+}
+
+.cl-title-input:focus {
+  border-bottom-color: var(--kk-green);
+}
+
+.cl-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kk-muted);
+}
+
+.cl-icon-btn:hover {
+  background: #f1f4f2;
+}
+
+.cl-danger:hover {
+  color: var(--kk-danger);
+  background: #fef2f2;
+}
+
+.cl-danger svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Progress */
+.cl-progress-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
 }
 
-.checklist-progress-label {
+.cl-progress-label {
   font-size: 13px;
   color: var(--kk-muted);
 }
 
-.checklist-progress-badge {
+.cl-progress-badge {
   font-size: 12px;
   font-weight: 600;
   color: var(--kk-green-dark);
   background: var(--kk-green-soft);
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 999px;
 }
 
-.checklist-progress-bar {
+.cl-progress-bar {
   height: 7px;
   border-radius: 999px;
   background: var(--kk-line);
   overflow: hidden;
 }
 
-.checklist-progress-fill {
+.cl-progress-fill {
   height: 100%;
   border-radius: inherit;
   background: var(--kk-green);
   transition: width 0.3s ease;
 }
 
-.checklist-items {
+/* Items */
+.cl-items {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
-.checklist-item {
-  width: 100%;
+.cl-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--kk-line);
-  border-radius: 14px;
-  background: #fff;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 10px;
 }
 
-.checklist-item:hover {
-  border-color: var(--kk-green);
-  box-shadow: 0 8px 18px -14px rgba(14, 122, 59, 0.6);
+.cl-item:hover {
+  background: #f7faf8;
 }
 
-.checklist-item.is-complete {
-  background: var(--kk-green-soft);
-  border-color: transparent;
-}
-
-.checklist-item-icon {
+.cl-check {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
   flex: none;
-  border-radius: 11px;
-  background: #f1f4f2;
-  color: var(--kk-muted);
-}
-
-.checklist-item-icon svg {
-  width: 20px;
-  height: 20px;
-}
-
-.checklist-item.is-complete .checklist-item-icon {
-  background: #fff;
-  color: var(--kk-green);
-}
-
-.checklist-item-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
-
-.checklist-item-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--kk-ink);
-}
-
-.checklist-item-desc {
-  font-size: 12.5px;
-  color: var(--kk-muted);
-}
-
-.checklist-item-check {
-  display: grid;
-  place-items: center;
   width: 24px;
   height: 24px;
-  flex: none;
-  border-radius: 50%;
+  border-radius: 7px;
   border: 2px solid var(--kk-line);
+  background: #fff;
   color: #fff;
 }
 
-.checklist-item.is-complete .checklist-item-check {
+.cl-item.is-done .cl-check {
   background: var(--kk-green);
   border-color: var(--kk-green);
 }
 
-.checklist-item-check svg {
-  width: 14px;
-  height: 14px;
+.cl-check svg {
+  width: 15px;
+  height: 15px;
 }
 
-.checklist-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.checklist-btn {
-  width: 100%;
-  padding: 13px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: filter 0.2s ease, background 0.2s ease, color 0.2s ease;
-}
-
-.checklist-btn-primary {
-  background: var(--kk-green);
-  color: #fff;
-  border: 1px solid var(--kk-green);
-}
-
-.checklist-btn-primary:hover {
-  filter: brightness(1.05);
-}
-
-.checklist-btn-outline {
-  background: #fff;
-  color: var(--kk-green-dark);
-  border: 1px solid var(--kk-green);
-}
-
-.checklist-btn-outline:hover {
-  background: var(--kk-green-soft);
-}
-
-.checklist-note {
-  display: flex;
-  gap: 10px;
-  padding: 13px 14px;
-  border-radius: 12px;
-  background: var(--kk-amber-bg);
-  border: 1px solid var(--kk-amber-line);
-  color: var(--kk-amber-ink);
-}
-
-.checklist-note-icon {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--kk-amber-line);
-  color: #6a4d0c;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.checklist-note p {
-  font-size: 12.5px;
-  line-height: 1.4;
-}
-
-.checklist-bottomnav {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  border-top: 1px solid var(--kk-line);
-  background: #fff;
-}
-
-.checklist-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 10px 0 12px;
-  background: none;
+.cl-item-input {
+  flex: 1;
+  min-width: 0;
   border: none;
-  cursor: pointer;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--kk-ink);
+  background: transparent;
+  outline: none;
+}
+
+.cl-item.is-done .cl-item-input {
+  text-decoration: line-through;
   color: var(--kk-muted);
-  font-size: 11px;
 }
 
-.checklist-nav-item svg {
-  width: 22px;
-  height: 22px;
+.cl-item-remove {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--kk-muted);
 }
 
-.checklist-nav-item.is-active {
-  color: var(--kk-green);
+.cl-item-remove:hover {
+  color: var(--kk-danger);
+  background: #fef2f2;
+}
+
+.cl-empty-items {
+  font-size: 13px;
+  color: var(--kk-muted);
+  padding: 6px 2px;
+}
+
+/* Add item */
+.cl-add-item {
+  display: flex;
+  gap: 8px;
+}
+
+.cl-add-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--kk-line);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+}
+
+.cl-add-input:focus {
+  border-color: var(--kk-green);
+  box-shadow: 0 0 0 3px rgba(26, 107, 66, 0.12);
+}
+
+.cl-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  border: 1px solid var(--kk-green);
+  border-radius: 10px;
+  background: var(--kk-green-soft);
+  color: var(--kk-green-dark);
+}
+
+.cl-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cl-add-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.cl-clear-btn {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: var(--kk-muted);
+  font-size: 13px;
   font-weight: 600;
+  padding: 4px 2px;
+}
+
+.cl-clear-btn:hover {
+  color: var(--kk-green-dark);
 }

@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import SideMenu from '../components/SideMenu'
-import { useAppDispatch, useAppSelector } from '../hooks'
-import { setLanguage } from '../store/languageSlice'
-import { ROUTE_PATHS } from '../routes/routePaths'
-import { landingContent } from './landingContent'
+import { buildChatLink, buildPresetChatLink } from '../data/chatPresets'
+import { useLanguage } from '../context/language'
+import { landingContent, type Language } from './landingContent'
 import './LandingPage.css'
 
 const featureIcons = {
@@ -40,14 +39,12 @@ const featureIcons = {
 
 function LandingPage() {
   const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const language = useAppSelector((state) => state.language.current)
+  const { lang, setLang } = useLanguage()
   const [menuOpen, setMenuOpen] = useState(false)
+  const language: Language = lang === 'rw' ? 'kinyarwanda' : 'english'
+  const setLanguage = (next: Language) => setLang(next === 'kinyarwanda' ? 'rw' : 'en')
   const t = landingContent[language]
-
-  useEffect(() => {
-    document.documentElement.lang = language === 'kinyarwanda' ? 'rw' : 'en'
-  }, [language])
+  const langCode = lang
 
   return (
     <div className="landing-page">
@@ -97,7 +94,7 @@ function LandingPage() {
                 language === 'kinyarwanda' ? ' landing-language__option--active' : ''
               }`}
               aria-pressed={language === 'kinyarwanda'}
-              onClick={() => dispatch(setLanguage('kinyarwanda'))}
+              onClick={() => setLanguage('kinyarwanda')}
             >
               <span className="landing-language__option-title">Kinyarwanda</span>
               <span className="landing-language__option-sub">{t.kinyarwandaSub}</span>
@@ -108,7 +105,7 @@ function LandingPage() {
                 language === 'english' ? ' landing-language__option--active' : ''
               }`}
               aria-pressed={language === 'english'}
-              onClick={() => dispatch(setLanguage('english'))}
+              onClick={() => setLanguage('english')}
             >
               <span className="landing-language__option-title">English</span>
               <span className="landing-language__option-sub">{t.englishSub}</span>
@@ -119,7 +116,7 @@ function LandingPage() {
         <button
           type="button"
           className="landing-cta"
-          onClick={() => navigate(ROUTE_PATHS.chat)}
+          onClick={() => navigate(buildChatLink({ language: langCode }))}
         >
           {t.cta}
           <span aria-hidden="true">→</span>
@@ -133,7 +130,7 @@ function LandingPage() {
                 key={id}
                 type="button"
                 className="landing-feature-card"
-                onClick={() => navigate(ROUTE_PATHS.chat)}
+                onClick={() => navigate(buildPresetChatLink(id, langCode, title))}
               >
                 <span
                   className="landing-feature-card__icon"
