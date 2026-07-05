@@ -9,6 +9,10 @@ import {
   type ChatLanguage,
 } from '../api/chat'
 import { MAX_HISTORY_MESSAGES } from '../config/api'
+import { useAppDispatch } from '../hooks'
+import { addChecklist } from '../store/checklistSlice'
+import { deriveChecklistTitle, parseChecklistItems } from '../utils/parseChecklist'
+import { ROUTE_PATHS } from '../routes/routePaths'
 import '../components/chat/chat.css'
 
 interface ChatMessage {
@@ -77,6 +81,7 @@ function AttachIcon() {
 
 function ChatPage() {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const initialLang: ChatLanguage = searchParams.get('lang') === 'rw' ? 'rw' : 'en'
@@ -260,6 +265,13 @@ function ChatPage() {
     void runSend(text, [])
   }
 
+  const handleSaveAsChecklist = (content: string) => {
+    const items = parseChecklistItems(content)
+    if (items.length === 0) return
+    dispatch(addChecklist({ title: deriveChecklistTitle(content), items }))
+    navigate(ROUTE_PATHS.checklist)
+  }
+
   useEffect(() => {
     return () => abortRef.current?.abort()
   }, [])
@@ -333,6 +345,12 @@ function ChatPage() {
           const isEmptyStreaming =
             message.content.length === 0 && message.id === lastMessage?.id && isStreaming
 
+          const isStreamingThis = isStreaming && message.id === lastMessage?.id
+          const canSaveChecklist =
+            !message.isError &&
+            !isStreamingThis &&
+            parseChecklistItems(message.content).length >= 2
+
           return (
             <div key={message.id} className="chat-row chat-row--assistant">
               <div
@@ -349,8 +367,15 @@ function ChatPage() {
                 ) : (
                   <>
                     <MarkdownMessage content={message.content} />
-                    {isStreaming && message.id === lastMessage?.id && (
-                      <span className="chat-cursor" aria-hidden="true" />
+                    {isStreamingThis && <span className="chat-cursor" aria-hidden="true" />}
+                    {canSaveChecklist && (
+                      <button
+                        type="button"
+                        className="chat-save-checklist"
+                        onClick={() => handleSaveAsChecklist(message.content)}
+                      >
+                        Save as checklist
+                      </button>
                     )}
                   </>
                 )}

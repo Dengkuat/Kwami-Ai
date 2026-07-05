@@ -249,7 +249,20 @@
   text-align: left;
 }
 
-/* Google Maps links */
+/* Google Maps embed + links */
+.chat-map {
+  margin-top: 10px;
+}
+
+.chat-map-frame {
+  display: block;
+  width: 100%;
+  height: 260px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
 .chat-map-chips {
   display: flex;
   flex-wrap: wrap;
@@ -278,6 +291,26 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+/* Save-as-checklist action */
+.chat-save-checklist {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-kwami-green, #1a6b42);
+  border-radius: var(--radius-pill);
+  background: var(--color-kwami-green-light, #e8f5ee);
+  color: var(--color-kwami-green-dark, #145a36);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.chat-save-checklist:hover {
+  background: var(--color-kwami-green, #1a6b42);
+  color: #fff;
 }
 
 /* Typing indicator */

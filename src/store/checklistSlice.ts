@@ -1,122 +1,166 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, nanoid, type PayloadAction } from '@reduxjs/toolkit'
+
+export const CHECKLISTS_STORAGE_KEY = 'kwami.checklists.v1'
 
 export interface ChecklistItem {
   id: string
-  title: string
-  description: string
-  completed: boolean
+  text: string
+  done: boolean
 }
 
-export interface ChecklistTemplate {
-  applicationName: string
-  items: Omit<ChecklistItem, 'completed'>[]
+export interface Checklist {
+  id: string
+  title: string
+  items: ChecklistItem[]
+  createdAt: number
 }
 
 export interface ChecklistState {
-  serviceId: string
-  applicationName: string
-  items: ChecklistItem[]
+  lists: Checklist[]
 }
 
-// Real-world checklist data keyed by service id.
-// `higher-education-equivalence` uses real requirements; the rest are placeholders.
-export const CHECKLIST_TEMPLATES: Record<string, ChecklistTemplate> = {
-  'higher-education-equivalence': {
-    applicationName: 'Higher Education Equivalence',
-    items: [
-      {
-        id: 'passport-photo',
-        title: 'Passport Photo',
-        description: '4×5 cm, white background',
-      },
-      {
-        id: 'notarized-transcript',
-        title: 'Notarized Academic Transcript',
-        description: 'Official transcript, notarized',
-      },
-      {
-        id: 'final-certificate',
-        title: 'Final Certificate',
-        description: 'Original final degree certificate',
-      },
-    ],
-  },
-  'national-id': {
-    applicationName: 'National ID Application',
-    items: [
-      { id: 'birth-certificate', title: 'Birth Certificate', description: 'Digital copy uploaded' },
-      { id: 'passport-photo', title: 'Passport Photo', description: '4×5 cm, white background' },
-      {
-        id: 'proof-of-residence',
-        title: 'Proof of Residence',
-        description: 'Sector-level certificate',
-      },
-      {
-        id: 'application-fee',
-        title: 'Application Fee Receipt',
-        description: 'RWF 500, pay online',
-      },
-    ],
-  },
-  'land-transfer': {
-    applicationName: 'Land Title Transfer',
-    items: [
-      { id: 'title-deed', title: 'Land Title Deed', description: 'Original title document' },
-      { id: 'tax-clearance', title: 'Tax Clearance', description: 'Cleared property taxes' },
-      { id: 'id-copies', title: 'ID Copies', description: 'Buyer and seller IDs' },
-      { id: 'transfer-fee', title: 'Transfer Fee Receipt', description: 'Pay at RDB' },
-    ],
-  },
-  'birth-certificate': {
-    applicationName: 'Birth Certificate',
-    items: [
-      { id: 'notification', title: 'Birth Notification', description: 'From hospital or sector' },
-      { id: 'parents-id', title: "Parents' IDs", description: 'Copies of both parents' },
-      { id: 'witness', title: 'Witness Declaration', description: 'If born at home' },
-    ],
-  },
+function makeItem(text: string): ChecklistItem {
+  return { id: nanoid(), text: text.trim(), done: false }
 }
 
-export const DEFAULT_SERVICE_ID = 'higher-education-equivalence'
-
-function buildState(serviceId: string): ChecklistState {
-  const template = CHECKLIST_TEMPLATES[serviceId] ?? CHECKLIST_TEMPLATES[DEFAULT_SERVICE_ID]
-  const resolvedId = CHECKLIST_TEMPLATES[serviceId] ? serviceId : DEFAULT_SERVICE_ID
+function makeList(title: string, items: string[] = []): Checklist {
   return {
-    serviceId: resolvedId,
-    applicationName: template.applicationName,
-    items: template.items.map((item) => ({ ...item, completed: false })),
+    id: nanoid(),
+    title: title.trim() || 'Untitled checklist',
+    items: items.map((text) => makeItem(text)).filter((item) => item.text.length > 0),
+    createdAt: Date.now(),
   }
 }
 
-const initialState: ChecklistState = buildState(DEFAULT_SERVICE_ID)
+/**
+ * Load persisted checklists from localStorage. Returns a seed checklist on the
+ * very first run so the page isn't empty, and falls back gracefully if the
+ * stored value is missing or corrupt.
+ */
+export function loadPersistedState(): ChecklistState {
+  if (typeof window === 'undefined') {
+    return { lists: [] }
+  }
+
+  try {
+    const raw = window.localStorage.getItem(CHECKLISTS_STORAGE_KEY)
+    if (!raw) {
+      return {
+        lists: [
+          makeList('Passport Application', [
+            'National ID card',
+            'Recent passport photo (4×5 cm, white background)',
+            'Proof of payment (application fee)',
+            'Completed application form',
+          ]),
+        ],
+      }
+    }
+
+    const parsed = JSON.parse(raw) as unknown
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray((parsed as ChecklistState).lists)) {
+      return { lists: [] }
+    }
+
+    // Defensively normalise the stored shape.
+    const lists = (parsed as ChecklistState).lists
+      .filter((list) => list && typeof list.id === 'string')
+      .map((list) => ({
+        id: list.id,
+        title: typeof list.title === 'string' ? list.title : 'Untitled checklist',
+        createdAt: typeof list.createdAt === 'number' ? list.createdAt : Date.now(),
+        items: Array.isArray(list.items)
+          ? list.items
+              .filter((item) => item && typeof item.id === 'string')
+              .map((item) => ({
+                id: item.id,
+                text: typeof item.text === 'string' ? item.text : '',
+                done: Boolean(item.done),
+              }))
+          : [],
+      }))
+
+    return { lists }
+  } catch {
+    return { lists: [] }
+  }
+}
+
+const initialState: ChecklistState = loadPersistedState()
 
 const checklistSlice = createSlice({
   name: 'checklist',
   initialState,
   reducers: {
-    loadChecklist(_state, action: PayloadAction<string>) {
-      return buildState(action.payload)
+    addChecklist: {
+      reducer(state, action: PayloadAction<Checklist>) {
+        state.lists.unshift(action.payload)
+      },
+      prepare(payload: { title: string; items?: string[] }) {
+        return { payload: makeList(payload.title, payload.items ?? []) }
+      },
     },
-    toggleItem(state, action: PayloadAction<string>) {
-      const item = state.items.find((i) => i.id === action.payload)
-      if (item) {
-        item.completed = !item.completed
+    renameChecklist(state, action: PayloadAction<{ listId: string; title: string }>) {
+      const list = state.lists.find((l) => l.id === action.payload.listId)
+      if (list) {
+        list.title = action.payload.title.trim() || 'Untitled checklist'
       }
     },
-    completeItem(state, action: PayloadAction<string>) {
-      const item = state.items.find((i) => i.id === action.payload)
+    deleteChecklist(state, action: PayloadAction<string>) {
+      state.lists = state.lists.filter((l) => l.id !== action.payload)
+    },
+    addItem: {
+      reducer(state, action: PayloadAction<{ listId: string; item: ChecklistItem }>) {
+        const list = state.lists.find((l) => l.id === action.payload.listId)
+        if (list && action.payload.item.text.length > 0) {
+          list.items.push(action.payload.item)
+        }
+      },
+      prepare(payload: { listId: string; text: string }) {
+        return { payload: { listId: payload.listId, item: makeItem(payload.text) } }
+      },
+    },
+    editItem(
+      state,
+      action: PayloadAction<{ listId: string; itemId: string; text: string }>,
+    ) {
+      const list = state.lists.find((l) => l.id === action.payload.listId)
+      const item = list?.items.find((i) => i.id === action.payload.itemId)
       if (item) {
-        item.completed = true
+        item.text = action.payload.text.trim()
       }
     },
-    resetChecklist(state) {
-      state.items.forEach((item) => {
-        item.completed = false
-      })
+    removeItem(state, action: PayloadAction<{ listId: string; itemId: string }>) {
+      const list = state.lists.find((l) => l.id === action.payload.listId)
+      if (list) {
+        list.items = list.items.filter((i) => i.id !== action.payload.itemId)
+      }
+    },
+    toggleItem(state, action: PayloadAction<{ listId: string; itemId: string }>) {
+      const list = state.lists.find((l) => l.id === action.payload.listId)
+      const item = list?.items.find((i) => i.id === action.payload.itemId)
+      if (item) {
+        item.done = !item.done
+      }
+    },
+    clearCompleted(state, action: PayloadAction<string>) {
+      const list = state.lists.find((l) => l.id === action.payload)
+      if (list) {
+        list.items = list.items.filter((i) => !i.done)
+      }
     },
   },
 })
 
-export const { loadChecklist, toggleItem, completeItem, resetChecklist } = checklistSlice.actions
+export const {
+  addChecklist,
+  renameChecklist,
+  deleteChecklist,
+  addItem,
+  editItem,
+  removeItem,
+  toggleItem,
+  clearCompleted,
+} = checklistSlice.actions
+
 export default checklistSlice.reducer
